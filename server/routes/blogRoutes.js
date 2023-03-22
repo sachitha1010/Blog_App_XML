@@ -34,32 +34,41 @@ router.get("/", async (req, res) => {
   });
   
 
-router.post("/",async (req,res)=>{
-    const blog =req.body
-    const newblog=new Blog(blog);
-    await newblog.save();
-    res.json(blog);
-});
+  router.post("/",async (req,res)=>{
+      const blog =req.body
+      const newblog=new Blog(blog);
+      await newblog.save();
+      res.json(blog);
+  });
 
-
-router.put("/updatetitle/:id",async(req,res)=>{
-    const newTitle=req.body.newTitle;
-    const id=req.params.id;
-    try{
-      await Blog.findById(id,(updatedblog)=>{
-        updatedblog.title=newTitle;
-        updatedblog.save();
-        res.send("updatetitle/:id");
+  router.put("/update/:id", async (req, res) => {
+    try {
+      const blog = await Blog.findOneAndUpdate({ _id: req.params.id }, req.body, {
+        new: true,
       });
-    }catch(err){
+      if (!blog) {
+        return res.status(404).json({ error: "Not Found" });
+      } else {
+        res.status(200).json(blog);
+      }
+    } catch (err) {
       console.log(err);
+      res.status(500).json({ error: err.message });
     }
   });
 
-  router.delete("/delete/:id",async(req,res)=>{
-    const id=req.params.id;
-    await Blog.findByIdAndRemove(id).exec();
-    res.send("deleted");
+  router.delete("/delete/:id", async (req, res) => {
+    try {
+      const blog = await Blog.findByIdAndRemove({ _id: req.params.id }).exec();
+      if (!blog) {
+        return res.status(404).json({ error: "Not Found" });
+      } else {
+        res.status(200).json(blog);
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.message });
+    }
   });
-
+  
 export default router;

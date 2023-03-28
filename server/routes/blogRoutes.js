@@ -13,10 +13,24 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage: storage});
+
   //get request - retrieve data
   router.get("/", async (req, res) => {
       try {
         const blog= await Blog.find({});
+        if (!blog) {
+          return res.status(404).json({ error: "Not Found" });
+        } else {
+          res.status(200).json(blog);
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+      }
+    });
+    router.get("/:id", async (req, res) => {
+      try {
+        const blog= await Blog.findOne({ _id: req.params.id });
         if (!blog) {
           return res.status(404).json({ error: "Not Found" });
         } else {
@@ -56,7 +70,7 @@ const upload = multer({storage: storage});
         image: req.file.originalname
       });
       await blog.save();
-      res.status(201).json({ blog: blog._id });
+      res.status(200).json(blog);
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: err.message });
